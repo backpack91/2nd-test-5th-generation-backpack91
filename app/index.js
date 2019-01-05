@@ -7,3 +7,5 @@ import 'styles/index.less';
 
 // You can use jquery for ajax request purpose only.
 import $ from 'jquery';
+
+//test
