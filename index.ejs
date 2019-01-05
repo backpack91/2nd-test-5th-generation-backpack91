@@ -3,11 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
+    <!-- <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c40d1db9adff8aeaef500764bcb98c6d"></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0BR5ueY8gFGIlnVYC47g5B0ftFYv9-A&callback=initMap"async defer></script>
+    <!-- <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC" rel="stylesheet"> -->
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Bungee+Inline" rel="stylesheet">
     <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
     <div class="content">
-        <h1>Boilerplate</h1>
+        <div class="header">
+          <h1>Vanilla MeetUP!</h1>
+        </div>
+        <div class="searchBox">
+          <input type="text" class="input">
+          <button type="button" name="button" class="inputBtn"></button>
+        </div>
+        <div class="main">
+          <div id="map"></div>
+          <div class="listWrapper">
+            <div class="meetupListChart">
+              <div class="listHeader">
+
+              </div>
+              <div class="list">
+
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
 </body>
 </html>
