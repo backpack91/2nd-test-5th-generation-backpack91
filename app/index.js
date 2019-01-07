@@ -11,6 +11,8 @@ import $ from 'jquery';
 let meetUpListStorage;
 let markerToBeRemoved = [];
 var map;
+var city;
+var numberOfEvents;
 
 function getGoogleMap() {
   return new Promise ((resolve, reject) => {
@@ -20,16 +22,12 @@ function getGoogleMap() {
       jsonpCallback: 'myCallback',
       success: function () {
         resolve();
-        console.log('got googleMap: ');
       },
       error: function (err) {
-        console.log('fail to get googleMap: ', err);
         reject(err);
       }
     });
   }).then(() => {
-    // console.log('googleVal: ', google);
-    // initMap();
     initAutocomplete();
   }).catch((err) => {
     console.log('getGoogleMap Error: ', err);
@@ -39,41 +37,47 @@ function getGoogleMap() {
 function getMeetUpList(lon, lat) {
   return new Promise ((resolve, reject) => {
     $.ajax({
-      url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=${lon}&page=20&lat=${lat}&fields=event_hosts,description_images,featured_photo&radius=3&key=7c75b126f72181153575d6f30631f68`,
+      url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=${lon}&page=10&lat=${lat}&fields=event_hosts,description_images,featured_photo&radius=3&key=7c75b126f72181153575d6f30631f68`,
       dataType: 'jsonp',
       jsonpCallback: 'myCallback',
       success: function(data) {
-        console.log('성공 - ', data.data.events);
-        resolve(data.data.events);
+        console.log(data);
+        resolve(data.data);
         meetUpListStorage = data.data.events;
-        console.log('meetUpListStorage: ', meetUpListStorage);
       },
       error: function(err) {
-        console.log('실패 - ', err);
         reject(err);
       }
     });
   }).then((val) => {
-    markUp(val);
+    city = val.city.city;
+    numberOfEvents = val.events.length;
+    markUp(val.events);
   }).catch((err) => {
     console.log('Error: ', err);
   });
 }
 
 function markUp (val) {
+  let data;
+  const listHeader = document.querySelector('.listHeader');
+  const bookmarkCounter = document.querySelector('.bookmarkCounter');
+
+  if (localStorage.getItem('loglevel:webpack-dev-server')) {
+    localStorage.removeItem('loglevel:webpack-dev-server');
+  }
+  bookmarkCounter.innerText = `${localStorage.length}`;
+  listHeader.innerText = `${city}에서 ${numberOfEvents}개의 MeetUp`;
   if (val && val.length > 0) {
     for (let i = 0; i < val.length; i++) {
       makeList(val[i]);
-      var data = val[i];
-
+      data = val[i];
       if (data.venue) {
-        console.log('isworking?');
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(data.venue.lat, data.venue.lon),
           map: map,
           animation: google.maps.Animation.DROP
         });
-        console.log('marker: ', marker);
       } else {
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(data.group.lat, data.group.lon),
@@ -84,7 +88,8 @@ function markUp (val) {
       markerToBeRemoved.push(marker);
     }
   } else {
-    var emptyMessage = document.createElement('div');
+    const emptyMessage = document.createElement('div');
+
     emptyMessage.classList.add('emptyMessage');
     emptyMessage.innerText = 'I can\'t find MEETUP ;(';
     document.querySelector('.list').appendChild(emptyMessage);
@@ -92,21 +97,20 @@ function markUp (val) {
 }
 
 function makeList (eventObject) {
-  var body = document.createElement('div');
-  var header = document.createElement('div');
-  var eventTitleWrapper = document.createElement('div');
-  var eventTitle = document.createElement('div');
-  var heart = document.createElement('div');
-  var groupTitle = document.createElement('div');
-  var eventInfo = document.createElement('div');
-  var details = document.createElement('div');
-  var detail = document.createElement('div');
-  var member = document.createElement('div');
+  const body = document.createElement('div');
+  const eventTitleWrapper = document.createElement('div');
+  const eventTitle = document.createElement('div');
+  const heart = document.createElement('div');
+  const groupTitle = document.createElement('div');
+  const eventInfo = document.createElement('div');
+  const details = document.createElement('div');
+  const detail = document.createElement('div');
+  const member = document.createElement('div');
+  let imgBox;
 
   eventTitle.innerText = eventObject.name;
   groupTitle.innerText = eventObject.group.name;
   detail.innerText = `date: ${eventObject.local_date} | time: ${eventObject.local_time} | rsvg: ${eventObject.yes_rsvp_count}`;
-  // console.log('eventObject.id: ', eventObject.id);
   if (localStorage.getItem(eventObject.id)) {
     heart.innerHTML = '<i class="fas fa-heart"></i>';
   } else {
@@ -115,7 +119,6 @@ function makeList (eventObject) {
   heart.setAttribute('id', eventObject.id);
   body.classList.add('eventBody');
   body.setAttribute('id', 'E' + eventObject.id);
-  header.classList.add('eventHeader');
   eventTitle.classList.add('eventTitle');
   eventTitleWrapper.classList.add('eventTitleWrapper');
   if (eventObject.featured_photo && eventObject.featured_photo.photo_link) {
@@ -132,30 +135,15 @@ function makeList (eventObject) {
   detail.classList.add('eventDetails');
   eventTitleWrapper.appendChild(eventTitle);
   eventTitleWrapper.appendChild(heart);
-  // header.appendChild(eventTitleWrapper);
   details.appendChild(groupTitle);
   details.appendChild(detail);
   eventInfo.appendChild(member);
   eventInfo.appendChild(details);
   body.appendChild(eventTitleWrapper);
   body.appendChild(eventInfo);
-  // body.appendChild(details);
-  // body.appendChild(member);
   if (eventObject['event_hosts']) {
-    // console.log('photo: ', eventObject.event_hosts[0].photo.highres_link);
-    // for (let i = 0; i < eventObject.event_hosts.length; i++) {
-    //   if (eventObject.event_hosts[i].photo.highres_link) {
-    //     var imgBox = document.createElement('img');
-    //     imgBox.src = eventObject.event_hosts[i].photo.highres_link;
-    //     imgBox.onerror = function () {
-    //       this.setAttribute('src', '/assets/images/altIMG_wh1200.jpg');
-    //     };
-    //     imgBox.classList.add('hostImg');
-    //     member.appendChild(imgBox);
-    //   }
-    // }
     if (eventObject.event_hosts[0].photo.photo_link) {
-      var imgBox = document.createElement('img');
+      imgBox = document.createElement('img');
       imgBox.src = eventObject.event_hosts[0].photo.photo_link;
       imgBox.onerror = function () {
         this.setAttribute('src', '/assets/images/altIMG_wh1200.jpg');
@@ -164,166 +152,103 @@ function makeList (eventObject) {
       member.appendChild(imgBox);
     }
   } else {
-    var imgBox = document.createElement('img');
+    imgBox = document.createElement('img');
     imgBox.src = '/assets/images/altIMG_wh1200.jpg';
-    // imgBox.onerror = function () {
-    //   this.setAttribute('src', '/assets/images/altIMG_wh1200.jpg');
-    // };
     imgBox.classList.add('hostImg');
     member.appendChild(imgBox);
-    console.log('don\'t have event_hosts');
   }
 
   heart.addEventListener('click', (e) => {
-    var thisMeetUp = document.querySelector(`#E${e.currentTarget.id}`);
-    var infoStorage = {};
-    if (localStorage.getItem('loglevel:webpack-dev-server')) {
-      localStorage.removeItem('loglevel:webpack-dev-server');
-    }
+    let thisMeetUp = document.querySelector(`#E${e.currentTarget.id}`);
+    let infoStorage = {};
+    const bookmarkCounter = document.querySelector('.bookmarkCounter');
+
     if (e.currentTarget.innerHTML === '<i class="far fa-heart"></i>') {
       e.currentTarget.innerHTML = '<i class="fas fa-heart"></i>';
       infoStorage.header = thisMeetUp.children[0].innerText;
-      // infoStorage.subHeader = thisMeetUp.children[1].innerText;
       infoStorage.details = thisMeetUp.children[1].children[1].innerHTML;
       infoStorage.hosts = thisMeetUp.children[1].children[0].innerHTML;
       infoStorage.id = e.currentTarget.id;
-      // console.log('idOfLocalStorage: ', e.currentTarget.id);
       localStorage.setItem(e.currentTarget.id, JSON.stringify(infoStorage));
-      // console.log('getItem', JSON.parse(localStorage.getItem(e.currentTarget.id)).id);
-      // console.log('infoStorage: ', infoStorage);
     } else {
       e.currentTarget.innerHTML = '<i class="far fa-heart"></i>';
       localStorage.removeItem(e.currentTarget.id);
     }
-    // console.log('e.target: ', e.target);
-    // console.log('e.currentTarget: ', e.currentTarget);
-    // console.log('localStrorage: ', localStorage);
+    bookmarkCounter.innerText = `${localStorage.length}`;
   });
   document.querySelector('.list').appendChild(body);
 }
 
 document.querySelector('.bookMark').addEventListener('click', () => {
-  var chart = document.querySelector('#bookmarkedChart');
+  const chart = document.querySelector('#bookmarkedChart');
 
   if (localStorage.getItem('loglevel:webpack-dev-server')) {
     localStorage.removeItem('loglevel:webpack-dev-server');
   }
-  // if (key === 'loglevel:webpack-dev-server') {
-  //   localStorage.removeItem('loglevel:webpack-dev-server');
-  //   break;
-  // }
   if (chart.classList.contains('hide')) {
     chart.classList.remove('hide');
     for (let key in localStorage) {
       if (localStorage.hasOwnProperty(key)) {
-        var parsedData = JSON.parse(localStorage.getItem(key));
-        // console.log('key: ', key);
-        var event = document.createElement('div');
-        var header = document.createElement('div');
-        var subHeader = document.createElement('div');
-        var details = document.createElement('div');
-        var hosts = document.createElement('div');
-        var deleteBox = document.createElement('div');
+        const parsedData = JSON.parse(localStorage.getItem(key));
+        const event = document.createElement('div');
+        const header = document.createElement('div');
+        const subHeader = document.createElement('div');
+        const details = document.createElement('div');
+        const hosts = document.createElement('div');
+        const deleteBox = document.createElement('div');
 
         deleteBox.classList.add('deleteBookmark');
         event.classList.add('bookmarkedEventBody');
         event.setAttribute('id', parsedData.id);
         header.classList.add('bookmarkedEventHeader');
-        // subHeader.classList.add('groupTitle');
         details.classList.add('eventDetails');
         deleteBox.innerHTML = '<i class="fas fa-times"></i>';
         header.innerText = parsedData.header;
-        // subHeader.innerText = parsedData.subHeader;
         details.innerHTML = parsedData.details;
         hosts.innerHTML = parsedData.hosts;
         subHeader.appendChild(header);
-        // event.appendChild(subHeader);
         subHeader.appendChild(details);
         event.appendChild(hosts);
         event.appendChild(subHeader);
         event.appendChild(deleteBox);
-        // event.innerHTML = '<div class="deleteBookmark"><i class="fas fa-times"></i></div>';
         chart.appendChild(event);
 
         deleteBox.addEventListener('click', (e) => {
-          console.log(e.currentTarget.parentNode);
+          const bookmarkCounter = document.querySelector('.bookmarkCounter');
+
           localStorage.removeItem(e.currentTarget.parentNode.id);
+          bookmarkCounter.innerText = `${localStorage.length}`;
           e.currentTarget.parentNode.remove();
           document.querySelector('.list').innerHTML = '';
           for (let i = 0; i < meetUpListStorage.length; i++) {
             makeList(meetUpListStorage[i]);
           }
+          if (document.querySelector('#bookmarkedChart').children.length === 0) {
+            document.querySelector('#bookmarkedChart').classList.add('hide');
+          }
         });
       }
     }
-    // console.log('chart: ', chart);
   } else {
     chart.classList.add('hide');
     chart.innerHTML = '';
   }
 });
-var map;
-var seoul = {lat: 37.561083, lng: 126.985307};
 
-// function initMap() {
-//   map = new google.maps.Map(document.getElementById('map'), {
-//     center: seoul,
-//     zoom: 16
-//   });
-//   var geocoder = new google.maps.Geocoder;
-//   var infowindow = new google.maps.InfoWindow;
-//   var marker = new google.maps.Marker({position: seoul, map: map});
-//
-//   map.addListener( "click", function (event) {
-//     markerToBeRemoved.forEach((item) => {
-//       item.setMap(null);
-//     });
-//     document.querySelector('.list').innerHTML = '';
-//     var latitude = event.latLng.lat();
-//     var longitude = event.latLng.lng();
-//     getMeetUpList(longitude, latitude);
-//     console.log( latitude + ', ' + longitude );
-//   });
-// }
-
-// function initMap() {
-//   map = new google.maps.Map(document.getElementById('map'), {
-//     center: seoul,
-//     zoom: 16
-//   });
-//   var geocoder = new google.maps.Geocoder;
-//   var infowindow = new google.maps.InfoWindow;
-//   var marker = new google.maps.Marker({position: seoul, map: map});
-//
-//   map.addListener( "click", function (event) {
-//     markerToBeRemoved.forEach((item) => {
-//       item.setMap(null);
-//     });
-//     document.querySelector('.list').innerHTML = '';
-//     var latitude = event.latLng.lat();
-//     var longitude = event.latLng.lng();
-//     getMeetUpList(longitude, latitude);
-//     console.log( latitude + ', ' + longitude );
-//   });
-// }
-//
 function initAutocomplete() {
-  var bounds_changedByEnter = false;
+  const seoul = {lat: 37.561083, lng: 126.985307};
+  let bounds_changedByEnter = false;
+  const marker = new google.maps.Marker({position: seoul, map: map});
+  const input = document.getElementById('input');
+  const searchBox = new google.maps.places.SearchBox(input);
+  let markers = [];
+
   map = new google.maps.Map(document.getElementById('map'), {
     center: seoul,
     zoom: 12,
     mapTypeId: 'roadmap'
   });
-
-  // var geocoder = new google.maps.Geocoder;
-  // var infowindow = new google.maps.InfoWindow;
-  var marker = new google.maps.Marker({position: seoul, map: map});
-  // Create the search box and link it to the UI element.
-  var input = document.getElementById('input');
-  var searchBox = new google.maps.places.SearchBox(input);
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-  // Bias the SearchBox results towards current map's viewport.
   map.addListener('bounds_changed', function() {
     if (bounds_changedByEnter) {
       var searchedLocation = map.getCenter();
@@ -340,89 +265,59 @@ function initAutocomplete() {
       bounds_changedByEnter = false;
     }
   });
-
   input.addEventListener('keypress', function(event) {
     if (event.keyCode === 13) {
       bounds_changedByEnter = true;
     }
   });
 
-
-
-  // input.addListener('keypress', function(event) {
-  //   // var searchedLocation = map.getCenter();
-  //   // console.log('searchedLocation: ', searchedLocation.lng());
-  //   // console.log('searchedLocation: ', searchedLocation.lat());
-  //   if (event.keyCode === 13) {
-  //     markerToBeRemoved.forEach((item) => {
-  //       item.setMap(null);
-  //     });
-  //     // document.querySelector('.list').innerHTML = '';
-  //     searchBox.setBounds(map.getBounds());
-  //     getMeetUpList(searchedLocation.lng(), searchedLocation.lat());
-  //   }
-  // });
-
-  var markers = [];
-  // Listen for the event fired when the user selects a prediction and retrieve
-  // more details for that place.
   searchBox.addListener('places_changed', function() {
-    var places = searchBox.getPlaces();
+    const places = searchBox.getPlaces();
+    const bounds = new google.maps.LatLngBounds();
 
     if (places.length == 0) {
       return;
     }
-
-    // Clear out the old markers.
     markers.forEach(function(marker) {
       marker.setMap(null);
     });
-    markers = [];
-
-    // For each place, get the icon, name and location.
-    var bounds = new google.maps.LatLngBounds();
+    markers.length = 0;
     places.forEach(function(place) {
-      if (!place.geometry) {
-        console.log("Returned place contains no geometry");
-        return;
-      }
-      var icon = {
+      const icon = {
         url: place.icon,
         size: new google.maps.Size(71, 71),
         origin: new google.maps.Point(0, 0),
         anchor: new google.maps.Point(17, 34),
         scaledSize: new google.maps.Size(25, 25)
       };
-
-      // Create a marker for each place.
+      if (!place.geometry) {
+        console.log("Returned place contains no geometry");
+        return;
+      }
       markers.push(new google.maps.Marker({
         map: map,
         icon: icon,
         title: place.name,
         position: place.geometry.location
       }));
-
       if (place.geometry.viewport) {
-        // Only geocodes have viewport.
         bounds.union(place.geometry.viewport);
       } else {
         bounds.extend(place.geometry.location);
       }
     });
     map.fitBounds(bounds);
-    // map.setZoom(13);
-    // map.setCenter(searchedLocation);
   });
 
   map.addListener( "click", function (event) {
+    const latitude = event.latLng.lat();
+    const longitude = event.latLng.lng();
+
     markerToBeRemoved.forEach((item) => {
       item.setMap(null);
     });
     document.querySelector('.list').innerHTML = '';
-    var latitude = event.latLng.lat();
-    var longitude = event.latLng.lng();
     getMeetUpList(longitude, latitude);
-    console.log( latitude + ', ' + longitude );
   });
   getMeetUpList(seoul.lng, seoul.lat);
 }
