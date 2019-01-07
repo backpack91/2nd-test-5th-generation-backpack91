@@ -106,10 +106,12 @@ function makeList (eventObject) {
   const details = document.createElement('div');
   const detail = document.createElement('div');
   const member = document.createElement('div');
+  const host = document.createElement('div');
   let imgBox;
 
   eventTitle.innerText = eventObject.name;
-  groupTitle.innerText = eventObject.group.name;
+  host.innerText = `host: ${eventObject.event_hosts[0].name}`;
+  groupTitle.innerText = `group: ${eventObject.group.name}`;
   detail.innerText = `date: ${eventObject.local_date} | time: ${eventObject.local_time} | rsvg: ${eventObject.yes_rsvp_count}`;
   if (localStorage.getItem(eventObject.id)) {
     heart.innerHTML = '<i class="fas fa-heart"></i>';
@@ -127,6 +129,7 @@ function makeList (eventObject) {
     eventTitleWrapper.classList.remove('eventTitleWrapper');
     eventTitleWrapper.classList.add('eventTitleWrapperWithoutPic');
   }
+  host.classList.add('host');
   heart.classList.add('heart');
   groupTitle.classList.add('groupTitle');
   eventInfo.classList.add('eventInfo');
@@ -135,6 +138,7 @@ function makeList (eventObject) {
   detail.classList.add('eventDetails');
   eventTitleWrapper.appendChild(eventTitle);
   eventTitleWrapper.appendChild(heart);
+  details.appendChild(host);
   details.appendChild(groupTitle);
   details.appendChild(detail);
   eventInfo.appendChild(member);
