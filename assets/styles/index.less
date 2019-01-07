@@ -5,24 +5,57 @@ html, body {
     box-sizing: border-box;
     background-color: white;
     font-family: 'Alegreya Sans SC', sans-serif;
+    width: 100%;
+    height: 100%;
+    margin: 0;
 }
 *, *:before, *:after {
     box-sizing: inherit;
 }
 
-.meetupListChart{
-  background-color: skyBlue;
+body {
+  // background-image: url('../images/vinicius-amano-581378-unsplash.jpg');
+  background-color: gray;
+  background-size: 110%;
+  position: relative;
+}
+
+.bookmarkedChart {
+  position: absolute;
+  background-color: black;
   width: 400px;
-  height: 500px;
+  height: 650px;
+  overflow: scroll;
+  right: 32px;
+  top: 40px;
+  z-index: 3;
+  opacity: 0.95;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+#bookmarkedChart {
+  transition: all 1s ease-out;
+}
+
+.hide {
+  display: none;
+
+}
+
+.meetupListChart{
+  width: 400px;
+  height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0 0 0 15px;
 }
 
 .main {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: flex-start;
 }
 
@@ -30,28 +63,42 @@ html, body {
   width: 100%;
   height: 100px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   font-family: 'Bungee Inline', cursive;
   font-size: 20px;
+  color: white;
+  padding: 30px 0 0 35px;
+  margin: 0 0 10px 0;
+}
+
+.spaceContainer {
+  width: 78%;
+}
+
+.bookMark {
+  margin: 0 0 50px 0;
+  font-size: 35px;
+  color: gold;
+  z-index: 4;
 }
 
 #map {
-  width: 900px;
-  height:500px;
+  width: 800px;
+  height:570px;
+  border-radius: 10px;
+  opacity: 0.95;
 }
 
 .listHeader {
-  width: 90%;
-  height: 10%;
-  background-color: white;
+  width: 100%;
+  height: 5%;
   margin: 2px;
 }
 
 .list {
-  width: 90%;
-  height: 80%;
-  background-color: white;
+  width: 100%;
+  height: 85%;
   margin: 2px;
   display : flex;
   flex-direction: column;
@@ -60,30 +107,33 @@ html, body {
   overflow: scroll;
 }
 
-// body.classList.add('eventBody');
-// header.classList.add('eventHeader');
-// eventTitle.classList.add('eventTitle');
-// groupTitle.classList.add('groupTitle');
-// member.classList.add('eventMember');
-// details.classList.add('eventDetails');
-// date.classList.add('eventDate');
-// time.classList.add('eventTime');
-
 .eventBody {
-  width: 95%;
-  background-color: skyBlue;
+  width: 100%;
+  color: white;
+  background-color: gray;
+  border: solid 1px white;
   margin: 3px;
+  opacity: 0.9;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.bookmarkedEventBody {
+  width: 95%;
+  color: white;
+  background-color: black;
+  margin: 3px;
+  opacity: 0.9;
+  // border-radius: 10px;
+  border-bottom: solid 1px white;
+  padding: 5px;
 }
 
 .eventHeader {
   width: 100%;
-  // height: 50px;
-  background-color: skyBlue;
-  // display: flex;
-  // justify-content: center;
-  // align-items: center;
   font-family: 'Bungee Inline', cursive;
   font-size: 20px;
+  margin: 3px 0 3px 5px;
 }
 
 .eventTitleWrapper {
@@ -98,43 +148,49 @@ html, body {
 
 .eventTitle {
   width: 100%;
-  // height: 95%;
 }
 
 .groupTitle {
-  font-size: 12px;
+  opacity: 1;
+  font-size: 14px;
   width: 100%;
-  // height: 95%;
 }
 
 .subHeader {
   width: 100%;
-  // height: 50px;
 }
 
 .eventMember {
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  margin: 0 0 5px 0;
 }
 
 .eventDetailsWrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 90%;
-  // height: 50px;
+  margin: 0 0 5px 0;
 }
 
 .eventDetails {
-  width: 45%;
-  text-align: center;
-  // height: 50px;
+  width: 100%;
 }
 
 .emptyMessage {
+  padding: 25px 0 0 14px;
   margin-top: 150px;
-  font-size: 30px;
+  font-size: 35px;
+  color: white;
+  font-weight: 800;
+  border: solid 2px white;
+  border-radius: 10px;
+  width: 350px;
+  height: 100px;
+  background-color: black;
+  opacity: 0.8;
 }
 
 .chosenMeetUp {

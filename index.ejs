@@ -11,13 +11,16 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
+    <div class="bookmarkedChart hide" id="bookmarkedChart"></div>
     <div class="content">
         <div class="header">
-          <h1>Vanilla MeetUP!</h1>
+          <h1>Vanilla<br>MeetUP<i class="fas fa-glass-cheers"></i></h1>
+          <div class="spaceContainer"></div>
+          <div class="bookMark"><i class="fas fa-star"></i></div>
         </div>
         <div class="searchBox">
-          <input type="text" class="input">
-          <button type="button" name="button" class="inputBtn"></button>
+          <!-- <input type="text" class="input">
+          <button type="button" name="button" class="inputBtn"></button> -->
         </div>
         <div class="main">
           <div id="map"></div>

@@ -8,14 +8,11 @@ import 'styles/index.less';
 // You can use jquery for ajax request purpose only.
 import $ from 'jquery';
 
-let basicInfoStorage = [];
-let hostsInfoStorage = [];
 let markerToBeRemoved = [];
 
 function getMeetUpList(lon, lat) {
   return new Promise ((resolve, reject) => {
     $.ajax({
-      // url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=126.985307&page=20&lat=37.561083&key=7c75b126f72181153575d6f30631f68`,
       url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=${lon}&page=20&lat=${lat}&fields=event_hosts&radius=5&key=7c75b126f72181153575d6f30631f68`,
       dataType: 'jsonp',
       jsonpCallback: 'myCallback',
@@ -32,24 +29,8 @@ function getMeetUpList(lon, lat) {
     listUp(val);
   }).catch((err) => {
     console.log('Error: ', err);
-  })
+  });
 }
-
-
-// $.ajax({
-//   // url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=126.985307&page=20&lat=37.561083&key=7c75b126f72181153575d6f30631f68`,
-//   url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=126.985307&page=20&lat=37.561083&fields=event_hosts&key=7c75b126f72181153575d6f30631f68`,
-//   dataType: 'jsonp',
-//   jsonpCallback: 'myCallback',
-//   success: function(data) {
-//     console.log('호스트사진 받아오기 성공 - ', data.data.events);
-//     resolve(data.data.events);
-//   },
-//   error: function(err) {
-//     console.log('호스트 사진 받아오기 실패 - ', err);
-//     reject(err);
-//   }
-// });
 
 function listUp (val) {
   let count = 0;
@@ -63,36 +44,16 @@ function listUp (val) {
       var data = val[i];
 
       if (data.venue) {
-        if (sameLocatedMeetUp[data.venue.lat + '|' + data.venue.lon]) {
-          sameLocatedMeetUp[data.venue.lat + '|' + data.venue.lon].push(thisMeetUp);
-        } else {
-          sameLocatedMeetUp[data.venue.lat + '|' + data.venue.lon] = [];
-        }
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(data.venue.lat, data.venue.lon),
           map: map,
           animation: google.maps.Animation.DROP
         });
-        marker.addListener('click', (e) => {
-          sameLocatedMeetUp[(data.venue.lat) + '|' + (data.venue.lon)].forEach((item) => {
-            item.classList.add('chosenMeetUp');
-          });
-        });
       } else {
-        if (sameLocatedMeetUp[data.group.lat + '|' + data.group.lon]) {
-          sameLocatedMeetUp[data.group.lat + '|' + data.group.lon].push(thisMeetUp);
-        } else {
-          sameLocatedMeetUp[data.group.lat + '|' + data.group.lon] = [];
-        }
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(data.group.lat, data.group.lon),
           map: map,
           animation: google.maps.Animation.DROP
-        });
-        marker.addListener('click', (e) => {
-          sameLocatedMeetUp[data.group.lat + '|' + data.group.lon].forEach((item) => {
-            item.classList.add('chosenMeetUp');
-          });
         });
       }
       markerToBeRemoved.push(marker);
@@ -116,17 +77,20 @@ function makeList (eventObject) {
   var subHeader = document.createElement('div');
   var details = document.createElement('div');
   var date = document.createElement('div');
-  var time = document.createElement('div');
-  var rsvp = document.createElement('div');
   var member = document.createElement('div');
 
   eventTitle.innerText = eventObject.name;
   groupTitle.innerText = eventObject.group.name;
-  date.innerText = '날짜: ' + eventObject.local_date;
-  time.innerText = '시간: ' + eventObject.local_time;
-  rsvp.innerText = '참여인원: ' + eventObject.yes_rsvp_count;
-  star.innerHTML = '<i class="far fa-star"></i>';
+  date.innerText = `date: ${eventObject.local_date} | time: ${eventObject.local_time} | rsvg: ${eventObject.yes_rsvp_count}`;
+  console.log('eventObject.id: ', eventObject.id);
+  if (localStorage.getItem(eventObject.id)) {
+    star.innerHTML = '<i class="fas fa-star"></i>';
+  } else {
+    star.innerHTML = '<i class="far fa-star"></i>';
+  }
+  star.setAttribute('id', eventObject.id);
   body.classList.add('eventBody');
+  body.setAttribute('id', 'E' + eventObject.id);
   header.classList.add('eventHeader');
   eventTitle.classList.add('eventTitle');
   eventTitleWrapper.classList.add('eventTitleWrapper');
@@ -136,39 +100,96 @@ function makeList (eventObject) {
   member.classList.add('eventMember');
   details.classList.add('eventDetailsWrapper');
   date.classList.add('eventDetails');
-  time.classList.add('eventDetails');
-  rsvp.classList.add('eventDetails');
   eventTitleWrapper.appendChild(eventTitle);
   eventTitleWrapper.appendChild(star);
   header.appendChild(eventTitleWrapper);
   subHeader.appendChild(groupTitle);
   details.appendChild(date);
-  details.appendChild(time);
-  details.appendChild(rsvp);
   body.appendChild(header);
   body.appendChild(subHeader);
-  body.appendChild(member);
   body.appendChild(details);
+  body.appendChild(member);
   if (eventObject['event_hosts']) {
     console.log('photo: ', eventObject.event_hosts[0].photo.highres_link);
     for (let i = 0; i < eventObject.event_hosts.length; i++) {
       var imgBox = document.createElement('img');
       imgBox.src = eventObject.event_hosts[i].photo.highres_link;
+      imgBox.onerror = function () {
+        this.setAttribute('src', '/assets/images/altIMG_wh1200.jpg');
+      };
       imgBox.classList.add('hostImg');
       member.appendChild(imgBox);
     }
   } else {
     console.log('don\'t have event_hosts');
   }
+
   star.addEventListener('click', (e) => {
+    var thisMeetUp = document.querySelector(`#E${e.currentTarget.id}`);
+    var infoStorage = {};
+    if (localStorage.getItem('loglevel:webpack-dev-server')) {
+      localStorage.removeItem('loglevel:webpack-dev-server');
+    }
+    if (e.currentTarget.innerHTML === '<i class="far fa-star"></i>') {
+      e.currentTarget.innerHTML = '<i class="fas fa-star"></i>';
+      infoStorage.header = thisMeetUp.children[0].innerText;
+      infoStorage.subHeader = thisMeetUp.children[1].innerText;
+      infoStorage.details = thisMeetUp.children[2].innerText;
+      infoStorage.hosts = thisMeetUp.children[3].innerHTML;
+      infoStorage.id = e.currentTarget.id;
+      console.log('idOfLocalStorage: ', e.currentTarget.id);
+      localStorage.setItem(e.currentTarget.id, JSON.stringify(infoStorage));
+      console.log('getItem', JSON.parse(localStorage.getItem(e.currentTarget.id)).id);
+      console.log('infoStorage: ', infoStorage);
+    } else {
+      e.currentTarget.innerHTML = '<i class="far fa-star"></i>';
+      localStorage.removeItem(e.currentTarget.id);
+    }
     console.log('e.target: ', e.target);
     console.log('e.currentTarget: ', e.currentTarget);
+    console.log('localStrorage: ', localStorage);
   });
   document.querySelector('.list').appendChild(body);
 }
 
+document.querySelector('.bookMark').addEventListener('click', (e) => {
+  var chart = document.querySelector('#bookmarkedChart');
+
+  if (chart.classList.contains('hide')) {
+    chart.classList.remove('hide');
+    for (let key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        var parsedData = JSON.parse(localStorage.getItem(key));
+        console.log('key: ', key);
+        var event = document.createElement('div');
+        var header = document.createElement('div');
+        var subHeader = document.createElement('div');
+        var details = document.createElement('div');
+        var hosts = document.createElement('div');
+        event.classList.add('bookmarkedEventBody');
+        header.classList.add('eventHeader');
+        subHeader.classList.add('groupTitle');
+        details.classList.add('eventDetails');
+        header.innerText = parsedData.header;
+        subHeader.innerText = parsedData.subHeader;
+        details.innerText = parsedData.details;
+        hosts.innerHTML = parsedData.hosts;
+        event.appendChild(header);
+        event.appendChild(subHeader);
+        event.appendChild(details);
+        event.appendChild(hosts);
+        chart.appendChild(event);
+      }
+    }
+    console.log('chart: ', chart);
+  } else {
+    chart.classList.add('hide');
+    chart.innerHTML = '';
+  }
+});
+
 var map;
-var seoul = {lat: 37.561083, lng: 126.985307}
+var seoul = {lat: 37.561083, lng: 126.985307};
 
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
@@ -186,30 +207,8 @@ function initMap() {
     document.querySelector('.list').innerHTML = '';
     var latitude = event.latLng.lat();
     var longitude = event.latLng.lng();
-    // geocodeLatLng(geocoder, map, infowindow, latitude, longitude);
     getMeetUpList(longitude, latitude);
     console.log( latitude + ', ' + longitude );
   });
 }
 initMap();
-
-// function geocodeLatLng(geocoder, map, infowindow, latitude, longitude) {
-//   var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
-//   geocoder.geocode({'location': latlng}, function(results, status) {
-//     if (status === 'OK') {
-//       if (latitude) {
-//         map.setZoom(11);
-//         var marker = new google.maps.Marker({
-//           position: latlng,
-//           map: map
-//         });
-//         infowindow.setContent(latitude.formatted_address);
-//         infowindow.open(map, marker);
-//       } else {
-//         window.alert('No results found');
-//       }
-//     } else {
-//       window.alert('Geocoder failed due to: ' + status);
-//     }
-//   });
-// }
