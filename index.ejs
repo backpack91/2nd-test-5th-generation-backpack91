@@ -4,37 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <!-- <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c40d1db9adff8aeaef500764bcb98c6d"></script> -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0BR5ueY8gFGIlnVYC47g5B0ftFYv9-A&callback=initMap"async defer></script>
     <!-- <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC" rel="stylesheet"> -->
-    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Bungee+Inline" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Bungee+Inline+Righteous" rel="stylesheet"> -->
+    <!-- <link href="https://fonts.googleapis.com/css?family=Patua+One" rel="stylesheet"> -->
+    <!-- <link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet"> -->
+    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
     <div class="bookmarkedChart hide" id="bookmarkedChart"></div>
     <div class="content">
-        <div class="header">
-          <h1>Vanilla<br>MeetUP<i class="fas fa-glass-cheers"></i></h1>
-          <div class="spaceContainer"></div>
-          <div class="bookMark"><i class="fas fa-star"></i></div>
-        </div>
         <div class="searchBox">
           <!-- <input type="text" class="input">
           <button type="button" name="button" class="inputBtn"></button> -->
         </div>
         <div class="main">
           <div id="map"></div>
-          <div class="listWrapper">
-            <div class="meetupListChart">
-              <div class="listHeader">
-
+          <div class="">
+            <div class="header">
+                <h1 class="headerTitle">Vanilla MeetUP</h1>
+              <div class="spaceContainer">
+                 <input id="input" class="controls" type="text" placeholder="Search Box">
               </div>
-              <div class="list">
+              <div class="bookMark"><i class="fas fa-heart"></i></i></div>
+            </div>
+            <div class="listWrapper">
+              <div class="meetupListChart">
+                <div class="listHeader">
 
+                </div>
+                <div class="list">
+
+                </div>
               </div>
             </div>
           </div>
+
         </div>
     </div>
+    <script type="text/javascript">
+      // var map;
+      // var seoul = {lat: 37.561083, lng: 126.985307};
+      //
+      // function initMap() {
+      //   map = new google.maps.Map(document.getElementById('map'), {
+      //     center: seoul,
+      //     zoom: 16
+      //   });
+      //   var geocoder = new google.maps.Geocoder;
+      //   var infowindow = new google.maps.InfoWindow;
+      //   var marker = new google.maps.Marker({position: seoul, map: map});
+      //
+      //   map.addListener( "click", function (event) {
+      //     markerToBeRemoved.forEach((item) => {
+      //       item.setMap(null);
+      //     });
+      //     document.querySelector('.list').innerHTML = '';
+      //     var latitude = event.latLng.lat();
+      //     var longitude = event.latLng.lng();
+      //     getMeetUpList(longitude, latitude);
+      //     console.log( latitude + ', ' + longitude );
+      //   });
+      // }
+    </script>
+    <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0BR5ueY8gFGIlnVYC47g5B0ftFYv9-A&"></script> -->
 </body>
 </html>
