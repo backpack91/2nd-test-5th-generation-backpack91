@@ -41,7 +41,6 @@ function getMeetUpList(lon, lat) {
       dataType: 'jsonp',
       jsonpCallback: 'myCallback',
       success: function(data) {
-        console.log(data);
         resolve(data.data);
         meetUpListStorage = data.data.events;
       },
@@ -110,7 +109,7 @@ function makeList (eventObject) {
   let imgBox;
 
   eventTitle.innerText = eventObject.name;
-  host.innerText = `host: ${eventObject.event_hosts[0].name}`;
+  eventObject.event_hosts ? host.innerText = `host: ${eventObject.event_hosts[0].name}` : host.innerText;
   groupTitle.innerText = `group: ${eventObject.group.name}`;
   detail.innerText = `date: ${eventObject.local_date} | time: ${eventObject.local_time} | rsvg: ${eventObject.yes_rsvp_count}`;
   if (localStorage.getItem(eventObject.id)) {
@@ -129,7 +128,7 @@ function makeList (eventObject) {
     eventTitleWrapper.classList.remove('eventTitleWrapper');
     eventTitleWrapper.classList.add('eventTitleWrapperWithoutPic');
   }
-  host.classList.add('host');
+  eventObject.event_hosts ? host.classList.add('host') : eventObject.event_hosts;
   heart.classList.add('heart');
   groupTitle.classList.add('groupTitle');
   eventInfo.classList.add('eventInfo');
@@ -138,7 +137,7 @@ function makeList (eventObject) {
   detail.classList.add('eventDetails');
   eventTitleWrapper.appendChild(eventTitle);
   eventTitleWrapper.appendChild(heart);
-  details.appendChild(host);
+  eventObject.event_hosts ? details.appendChild(host) : eventObject.event_hosts;
   details.appendChild(groupTitle);
   details.appendChild(detail);
   eventInfo.appendChild(member);
@@ -256,8 +255,6 @@ function initAutocomplete() {
   map.addListener('bounds_changed', function() {
     if (bounds_changedByEnter) {
       var searchedLocation = map.getCenter();
-      console.log('searchedLocation: ', searchedLocation.lng());
-      console.log('searchedLocation: ', searchedLocation.lat());
       markerToBeRemoved.forEach((item) => {
         item.setMap(null);
       });
@@ -295,7 +292,6 @@ function initAutocomplete() {
         scaledSize: new google.maps.Size(25, 25)
       };
       if (!place.geometry) {
-        console.log("Returned place contains no geometry");
         return;
       }
       markers.push(new google.maps.Marker({
