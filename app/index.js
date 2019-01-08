@@ -255,6 +255,7 @@ function initAutocomplete() {
   map.addListener('bounds_changed', function() {
     if (boundsChangedByEnter) {
       var searchedLocation = map.getCenter();
+      
       markerToBeRemoved.forEach((item) => {
         item.setMap(null);
       });
