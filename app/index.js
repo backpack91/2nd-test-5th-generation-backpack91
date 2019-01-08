@@ -95,59 +95,59 @@ function markUp (val) {
   }
 }
 
-function makeList (eventObject) {
+function makeList (eventData) {
   const body = document.createElement('div');
   const eventTitleWrapper = document.createElement('div');
   const eventTitle = document.createElement('div');
-  const heart = document.createElement('div');
+  const bookmarkAdder = document.createElement('div');
   const groupTitle = document.createElement('div');
-  const eventInfo = document.createElement('div');
+  const eventInfos = document.createElement('div');
   const details = document.createElement('div');
   const detail = document.createElement('div');
   const member = document.createElement('div');
   const host = document.createElement('div');
   let imgBox;
 
-  eventTitle.innerText = eventObject.name;
-  eventObject.event_hosts ? host.innerText = `host: ${eventObject.event_hosts[0].name}` : host.innerText;
-  groupTitle.innerText = `group: ${eventObject.group.name}`;
-  detail.innerText = `date: ${eventObject.local_date} | time: ${eventObject.local_time} | rsvg: ${eventObject.yes_rsvp_count}`;
-  if (localStorage.getItem(eventObject.id)) {
-    heart.innerHTML = '<i class="fas fa-heart"></i>';
+  eventTitle.innerText = eventData.name;
+  eventData.event_hosts ? host.innerText = `host: ${eventData.event_hosts[0].name}` : host.innerText;
+  groupTitle.innerText = `group: ${eventData.group.name}`;
+  detail.innerText = `date: ${eventData.local_date} | time: ${eventData.local_time} | rsvg: ${eventData.yes_rsvp_count}`;
+  if (localStorage.getItem(eventData.id)) {
+    bookmarkAdder.innerHTML = '<i class="fas fa-heart"></i>';
   } else {
-    heart.innerHTML = '<i class="far fa-heart"></i>';
+    bookmarkAdder.innerHTML = '<i class="far fa-heart"></i>';
   }
-  heart.setAttribute('id', eventObject.id);
+  bookmarkAdder.setAttribute('id', eventData.id);
   body.classList.add('eventBody');
-  body.setAttribute('id', 'E' + eventObject.id);
+  body.setAttribute('id', 'E' + eventData.id);
   eventTitle.classList.add('eventTitle');
   eventTitleWrapper.classList.add('eventTitleWrapper');
-  if (eventObject.featured_photo && eventObject.featured_photo.photo_link) {
-    eventTitleWrapper.setAttribute('style', `background-image: url(${eventObject.featured_photo.photo_link});`);
+  if (eventData.featured_photo && eventData.featured_photo.photo_link) {
+    eventTitleWrapper.setAttribute('style', `background-image: url(${eventData.featured_photo.photo_link});`);
   } else {
     eventTitleWrapper.classList.remove('eventTitleWrapper');
     eventTitleWrapper.classList.add('eventTitleWrapperWithoutPic');
   }
-  eventObject.event_hosts ? host.classList.add('host') : eventObject.event_hosts;
-  heart.classList.add('heart');
+  eventData.event_hosts ? host.classList.add('host') : eventData.event_hosts;
+  bookmarkAdder.classList.add('bookmarkAdder');
   groupTitle.classList.add('groupTitle');
-  eventInfo.classList.add('eventInfo');
+  eventInfos.classList.add('eventInfos');
   member.classList.add('eventMember');
   details.classList.add('eventDetailsWrapper');
   detail.classList.add('eventDetails');
   eventTitleWrapper.appendChild(eventTitle);
-  eventTitleWrapper.appendChild(heart);
-  eventObject.event_hosts ? details.appendChild(host) : eventObject.event_hosts;
+  eventTitleWrapper.appendChild(bookmarkAdder);
+  eventData.event_hosts ? details.appendChild(host) : eventData.event_hosts;
   details.appendChild(groupTitle);
   details.appendChild(detail);
-  eventInfo.appendChild(member);
-  eventInfo.appendChild(details);
+  eventInfos.appendChild(member);
+  eventInfos.appendChild(details);
   body.appendChild(eventTitleWrapper);
-  body.appendChild(eventInfo);
-  if (eventObject['event_hosts']) {
-    if (eventObject.event_hosts[0].photo.photo_link) {
+  body.appendChild(eventInfos);
+  if (eventData['event_hosts']) {
+    if (eventData.event_hosts[0].photo.photo_link) {
       imgBox = document.createElement('img');
-      imgBox.src = eventObject.event_hosts[0].photo.photo_link;
+      imgBox.src = eventData.event_hosts[0].photo.photo_link;
       imgBox.onerror = function () {
         this.setAttribute('src', '/assets/images/altIMG_wh1200.jpg');
       };
@@ -161,7 +161,7 @@ function makeList (eventObject) {
     member.appendChild(imgBox);
   }
 
-  heart.addEventListener('click', (e) => {
+  bookmarkAdder.addEventListener('click', (e) => {
     let thisMeetUp = document.querySelector(`#E${e.currentTarget.id}`);
     let infoStorage = {};
     const bookmarkCounter = document.querySelector('.bookmarkCounter');
@@ -182,7 +182,7 @@ function makeList (eventObject) {
   document.querySelector('.list').appendChild(body);
 }
 
-document.querySelector('.bookMark').addEventListener('click', () => {
+document.querySelector('.bookmark').addEventListener('click', () => {
   const chart = document.querySelector('#bookmarkedChart');
 
   if (localStorage.getItem('loglevel:webpack-dev-server')) {
@@ -240,7 +240,7 @@ document.querySelector('.bookMark').addEventListener('click', () => {
 
 function initAutocomplete() {
   const seoul = {lat: 37.561083, lng: 126.985307};
-  let bounds_changedByEnter = false;
+  let boundsChangedByEnter = false;
   const marker = new google.maps.Marker({position: seoul, map: map});
   const input = document.getElementById('input');
   const searchBox = new google.maps.places.SearchBox(input);
@@ -253,7 +253,7 @@ function initAutocomplete() {
   });
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
   map.addListener('bounds_changed', function() {
-    if (bounds_changedByEnter) {
+    if (boundsChangedByEnter) {
       var searchedLocation = map.getCenter();
       markerToBeRemoved.forEach((item) => {
         item.setMap(null);
@@ -263,12 +263,12 @@ function initAutocomplete() {
       getMeetUpList(searchedLocation.lng(), searchedLocation.lat());
       map.setZoom(12);
       map.setCenter(searchBox.getPlaces()[0].geometry.location);
-      bounds_changedByEnter = false;
+      boundsChangedByEnter = false;
     }
   });
   input.addEventListener('keypress', function(event) {
     if (event.keyCode === 13) {
-      bounds_changedByEnter = true;
+      boundsChangedByEnter = true;
     }
   });
 
