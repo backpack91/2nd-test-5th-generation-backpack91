@@ -15,6 +15,7 @@ var city;
 var numberOfEvents;
 
 function getGoogleMap() {
+  // loading();
   return new Promise ((resolve, reject) => {
     $.ajax({
       url: 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDC1nZk56ufK4AGgpSIr9Z3Bq0ksP3ls9U&libraries=places',
@@ -35,6 +36,7 @@ function getGoogleMap() {
 }
 
 function getMeetUpList(lon, lat) {
+  // loading();
   return new Promise ((resolve, reject) => {
     $.ajax({
       url: `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=${lon}&page=10&lat=${lat}&fields=event_hosts,description_images,featured_photo&radius=3&key=7c75b126f72181153575d6f30631f68`,
@@ -67,6 +69,7 @@ function markUp (val) {
   }
   bookmarkCounter.innerText = `${localStorage.length}`;
   listHeader.innerText = `${city}에서 ${numberOfEvents}개의 MeetUp`;
+  document.querySelector('.list').innerHTML = '';
   if (val && val.length > 0) {
     for (let i = 0; i < val.length; i++) {
       makeList(val[i]);
@@ -255,7 +258,7 @@ function initAutocomplete() {
   map.addListener('bounds_changed', function() {
     if (boundsChangedByEnter) {
       var searchedLocation = map.getCenter();
-      
+
       markerToBeRemoved.forEach((item) => {
         item.setMap(null);
       });
@@ -322,5 +325,10 @@ function initAutocomplete() {
   });
   getMeetUpList(seoul.lng, seoul.lat);
 }
+
+// function loading () {
+//   var list = document.querySelector('.list');
+//   list.innerHTML = '<div class="loading"><div class="spinner-wrapper"><span class="spinner-text">LOADING</span><span class="spinner"></span></div></div>';
+// }
 
 getGoogleMap();
